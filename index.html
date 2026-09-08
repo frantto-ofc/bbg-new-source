@@ -2734,99 +2734,99 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 <script id="bbg-model-carousel-script">
 (() => {
   const start = () => {
-    const rail = document.querySelector('.bbg-elementor #modelos.feature-grid');
+    const root = document.querySelector('.bbg-elementor');
+    const rail = root?.querySelector('#modelos.feature-grid');
     if (!rail || rail.dataset.loopReady === '1') return;
-    const originals = [...rail.querySelectorAll(':scope > .model-row')].slice(0, 4);
-    if (originals.length !== 4) return;
     rail.dataset.loopReady = '1';
-    [...rail.children].slice(4).forEach(card => card.remove());
-    for (let set = 0; set < 2; set++) originals.forEach(card => {
-      const clone = card.cloneNode(true);
-      clone.dataset.marqueeClone = 'true';
-      clone.setAttribute('aria-hidden', 'true');
-      clone.removeAttribute('id');
-      clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-      clone.querySelectorAll('a,button,[tabindex]').forEach(el => el.tabIndex = -1);
-      rail.appendChild(clone);
-    });
-    let position = 0, loopWidth = 0, hovered = false, focused = false;
-    let pointer = null, lastX = 0, distance = 0, dragged = false;
+
+    const originals = [...rail.querySelectorAll(':scope > .model-row')].slice(0, 4);
+    if (!originals.length) return;
+    originals.forEach((card) => rail.appendChild(card.cloneNode(true)));
+
+    let pausedByHover = false;
+    let dragging = false;
+    let dragged = false;
+    let startX = 0;
+    let startScroll = 0;
+    let raf = 0;
     let last = performance.now();
-    const wrap = value => loopWidth ? ((value % loopWidth) + loopWidth) % loopWidth : 0;
-    const render = () => {
-      position = wrap(position);
-      rail.scrollLeft = position;
+    const speed = 18;
+
+    const normalize = () => {
+      const firstClone = rail.children[originals.length];
+      if (!firstClone) return;
+      const loopWidth = firstClone.offsetLeft - rail.children[0].offsetLeft;
+      if (loopWidth <= 0) return;
+      while (rail.scrollLeft >= loopWidth) rail.scrollLeft -= loopWidth;
+      while (rail.scrollLeft < 0) rail.scrollLeft += loopWidth;
     };
-    const measure = () => {
-      const previous = loopWidth;
-      loopWidth = rail.children[4].offsetLeft - rail.children[0].offsetLeft;
-      if (previous > 0) position = position / previous * loopWidth;
-      render();
-    };
-    measure();
-    // Keep fractional progress outside scrollLeft: browsers may round scroll offsets.
-    const tick = now => {
-      const elapsed = Math.min(50, now - last);
+
+    const tick = (now) => {
+      const dt = Math.min(40, now - last);
       last = now;
-      if (!hovered && !focused && pointer === null && !document.hidden) {
-        position += 26 * elapsed / 1000;
-        render();
+      if (!pausedByHover && !dragging) {
+        rail.scrollLeft += speed * dt / 1000;
+        normalize();
       }
-      requestAnimationFrame(tick);
+      raf = requestAnimationFrame(tick);
     };
-    rail.addEventListener('pointerenter', event => {
-      if (event.pointerType === 'mouse') hovered = true;
+
+    const allCards = () => [...rail.querySelectorAll(':scope > .model-row')];
+    allCards().forEach((card) => {
+      card.addEventListener('mouseenter', () => { pausedByHover = true; });
+      card.addEventListener('mouseleave', () => { pausedByHover = false; });
     });
-    rail.addEventListener('pointerleave', event => {
-      if (event.pointerType === 'mouse') hovered = false;
-    });
-    rail.addEventListener('focusin', () => { focused = true; });
-    rail.addEventListener('focusout', event => { focused = rail.contains(event.relatedTarget); });
-    rail.addEventListener('dragstart', event => event.preventDefault());
-    rail.addEventListener('pointerdown', event => {
-      if (pointer !== null || (event.pointerType === 'mouse' && event.button !== 0)) return;
-      pointer = event.pointerId;
-      lastX = event.clientX;
-      distance = 0;
+
+    rail.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      dragging = true;
       dragged = false;
+      startX = event.clientX;
+      startScroll = rail.scrollLeft;
       rail.classList.add('is-dragging');
-      rail.setPointerCapture(event.pointerId);
+      rail.setPointerCapture?.(event.pointerId);
     });
-    rail.addEventListener('pointermove', event => {
-      if (pointer !== event.pointerId) return;
-      const delta = lastX - event.clientX;
-      lastX = event.clientX;
-      distance += Math.abs(delta);
-      dragged = distance > 4;
-      position += delta;
-      render();
-      if (event.cancelable) event.preventDefault();
+
+    rail.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      const delta = event.clientX - startX;
+      if (Math.abs(delta) > 4) dragged = true;
+      rail.scrollLeft = startScroll - delta;
+      normalize();
+      event.preventDefault();
     });
-    const finish = event => {
-      if (pointer !== event.pointerId) return;
-      pointer = null;
+
+    const endDrag = (event) => {
+      if (!dragging) return;
+      dragging = false;
       rail.classList.remove('is-dragging');
-      if (rail.hasPointerCapture(event.pointerId)) rail.releasePointerCapture(event.pointerId);
-      if (event.pointerType === 'mouse') {
-        const bounds = rail.getBoundingClientRect();
-        hovered = event.clientX >= bounds.left && event.clientX <= bounds.right &&
-          event.clientY >= bounds.top && event.clientY <= bounds.bottom;
-      }
+      rail.releasePointerCapture?.(event.pointerId);
+      normalize();
     };
-    rail.addEventListener('pointerup', finish);
-    rail.addEventListener('pointercancel', finish);
-    rail.addEventListener('lostpointercapture', finish);
-    rail.addEventListener('click', event => {
-      if (dragged || event.target.closest('.model-card-link')) {
+
+    rail.addEventListener('pointerup', endDrag);
+    rail.addEventListener('pointercancel', endDrag);
+    rail.addEventListener('pointerleave', (event) => {
+      if (dragging) endDrag(event);
+    });
+
+    rail.addEventListener('focusin', () => { pausedByHover = true; });
+    rail.addEventListener('focusout', () => { pausedByHover = false; });
+
+    rail.addEventListener('click', (event) => {
+      const link = event.target.closest('.model-card-link');
+      if (link) {
         event.preventDefault();
-        event.stopPropagation();
+        if (dragged) event.stopPropagation();
       }
       dragged = false;
     }, true);
-    new ResizeObserver(measure).observe(rail);
-    requestAnimationFrame(tick);
+
+    raf = requestAnimationFrame(tick);
+    window.addEventListener('pagehide', () => cancelAnimationFrame(raf), { once:true });
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
   else start();
 })();
 </script>
