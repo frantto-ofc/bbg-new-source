@@ -12,28 +12,41 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: hero-video-20260908
-      - name: Build source
+      - name: Build source from preserved production snapshot
         run: |
-          curl -fsSL https://raw.githubusercontent.com/frantto-ofc/bbg-site/main/index.html -o index.html
+          curl -fsSL https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app -o index.html
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p=Path('index.html')
           s=p.read_text()
-          new='https://lime-chinchilla-401530.hostingersite.com/wp-content/uploads/2026/09/939CD7B5-391D-40DD-AF10-D3F40CDB092F.mp4'
-          old='/media/hero/bbg-current-hero.mp4'
+          base='https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app'
+          new='https://res.cloudinary.com/lrs5yocs/video/upload/v1788830397/bbg/hero-video-20260908.mp4'
+
+          old='<source src="/media/hero/bbg-current-hero.mp4" type="video/mp4" />'
           if old not in s:
-              raise SystemExit('Hero video source not found')
-          s=s.replace(old,new,1)
-          base='https://bbg-site.vercel.app'
-          s=s.replace('src="/media/',f'src="{base}/media/')
-          s=s.replace('poster="/media/',f'poster="{base}/media/')
-          s=s.replace('url(/media/',f'url({base}/media/')
-          s=s.replace('src="/logo-bbg.svg"',f'src="{base}/logo-bbg.svg"')
-          s=s.replace('url(/_next/',f'url({base}/_next/')
+              raise SystemExit('Hero video source not found in preserved source')
+          s=s.replace(old, f'<source src="{new}" type="video/mp4" />', 1)
+
+          # Keep every other original asset exactly as published by the preserved Sep 4 snapshot.
+          s=s.replace('src="/media/', f'src="{base}/media/')
+          s=s.replace('poster="/media/', f'poster="{base}/media/')
+          s=s.replace('url(/media/', f'url({base}/media/')
+          s=s.replace('src="/logo-bbg.svg"', f'src="{base}/logo-bbg.svg"')
+          s=s.replace('href="/favicon.png"', f'href="{base}/favicon.png"')
+          s=s.replace('url(/_next/', f'url({base}/_next/')
+
+          # Remove only the description inside the financing card in the secondary hero.
+          hero_card = re.compile(r'(<article class="secondary-hero-card">.*?<div class="secondary-hero-card-content">.*?<h3>.*?</h3>)\s*<p>.*?</p>(\s*</div>\s*</article>)', re.S)
+          s, n = hero_card.subn(r'\1\2', s, count=1)
+          if n != 1:
+              raise SystemExit(f'Hero card description removal failed: {n}')
+
           css='''<style id="hero-card-80">\n.bbg-elementor .secondary-hero-card{transform:scale(.8);transform-origin:right center;}\n.bbg-elementor .secondary-hero-card-content h3{margin-bottom:0;}\n@media(max-width:900px){.bbg-elementor .secondary-hero-card{transform-origin:center center;}}\n</style>'''
-          s=s.replace('</head>',css+'</head>',1)
+          s=s.replace('</head>', css+'</head>', 1)
+
           p.write_text(s)
-          print('Hero updated to Hostinger MP4; card scaled to 80%')
+          print('Preserved Sep 4 source + new hero video + 80% card + hero description removed')
           PY
       - name: Commit preview source
         run: |
