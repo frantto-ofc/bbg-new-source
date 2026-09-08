@@ -13,16 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore alternating Fernando sections
-        shell: python
         run: |
+          python3 - <<'PY'
           from pathlib import Path
 
           path = Path('index.html')
           html = path.read_text(encoding='utf-8')
+
+          if 'id="fernando-2"' in html or 'id="fernando-3"' in html:
+              print('Additional Fernando sections already exist; nothing to do.')
+              raise SystemExit(0)
 
           start = html.find('<section class="fernando-section" id="fernando"')
           if start == -1:
@@ -35,10 +37,6 @@ jobs:
 
           original = html[start:end]
 
-          # Avoid duplicating again if this workflow is re-run.
-          if 'id="fernando-2"' in html or 'id="fernando-3"' in html:
-              raise SystemExit('Additional Fernando sections already exist')
-
           second = original.replace('id="fernando"', 'id="fernando-2"', 1)
           second = second.replace('aria-labelledby="fernando-title"', 'aria-labelledby="fernando-title-2"', 1)
           second = second.replace('id="fernando-title"', 'id="fernando-title-2"', 1)
@@ -49,74 +47,29 @@ jobs:
           third = third.replace('id="fernando-title"', 'id="fernando-title-3"', 1)
           third = third.replace('class="fernando-section"', 'class="fernando-section fernando-section-third"', 1)
 
-          replacement = original + '\n' + second + '\n' + third
-          html = html[:start] + replacement + html[end:]
+          html = html[:start] + original + '\n' + second + '\n' + third + html[end:]
 
-          css = r'''
+          css = '''
 /* Fernando — sequência de 3 seções alternadas */
-.bbg-elementor .fernando-section + .fernando-section{
-  padding-top:0;
-}
-.bbg-elementor .fernando-section-alt{
-  color:#111;
-  background:#fff;
-}
-.bbg-elementor .fernando-section-alt .fernando-shell{
-  background:#f0eee8;
-  color:#111;
-  grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);
-}
-.bbg-elementor .fernando-section-alt .fernando-portrait{
-  grid-column:2;
-  grid-row:1;
-}
-.bbg-elementor .fernando-section-alt .fernando-content{
-  grid-column:1;
-  grid-row:1;
-}
-.bbg-elementor .fernando-section-alt .fernando-content .prime-label{
-  color:#777;
-}
-.bbg-elementor .fernando-section-alt .fernando-content h2{
-  color:#111;
-}
-.bbg-elementor .fernando-section-alt .fernando-role{
-  color:#AE9C6E;
-}
-.bbg-elementor .fernando-section-alt .fernando-summary p{
-  color:#555;
-}
-.bbg-elementor .fernando-section-alt .fernando-milestones{
-  border-top-color:#1113;
-}
-.bbg-elementor .fernando-section-alt .fernando-milestones>div{
-  border-right-color:#1113;
-}
-.bbg-elementor .fernando-section-alt .fernando-milestones dt{
-  color:#111;
-}
-.bbg-elementor .fernando-section-alt .fernando-milestones dd{
-  color:#666;
-}
-.bbg-elementor .fernando-section-alt .fernando-link{
-  color:#111;
-  border-bottom-color:#1118;
-}
-.bbg-elementor .fernando-section-third{
-  background:#fff;
-}
+.bbg-elementor .fernando-section + .fernando-section{padding-top:0;}
+.bbg-elementor .fernando-section-alt{color:#111;background:#fff;}
+.bbg-elementor .fernando-section-alt .fernando-shell{background:#f0eee8;color:#111;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);}
+.bbg-elementor .fernando-section-alt .fernando-portrait{grid-column:2;grid-row:1;}
+.bbg-elementor .fernando-section-alt .fernando-content{grid-column:1;grid-row:1;}
+.bbg-elementor .fernando-section-alt .fernando-content .prime-label{color:#777;}
+.bbg-elementor .fernando-section-alt .fernando-content h2{color:#111;}
+.bbg-elementor .fernando-section-alt .fernando-role{color:#AE9C6E;}
+.bbg-elementor .fernando-section-alt .fernando-summary p{color:#555;}
+.bbg-elementor .fernando-section-alt .fernando-milestones{border-top-color:#1113;}
+.bbg-elementor .fernando-section-alt .fernando-milestones>div{border-right-color:#1113;}
+.bbg-elementor .fernando-section-alt .fernando-milestones dt{color:#111;}
+.bbg-elementor .fernando-section-alt .fernando-milestones dd{color:#666;}
+.bbg-elementor .fernando-section-alt .fernando-link{color:#111;border-bottom-color:#1118;}
+.bbg-elementor .fernando-section-third{background:#fff;}
 @media(max-width:1000px){
-  .bbg-elementor .fernando-section-alt .fernando-shell{
-    grid-template-columns:1fr;
-  }
-  .bbg-elementor .fernando-section-alt .fernando-portrait{
-    grid-column:1;
-    grid-row:1;
-  }
-  .bbg-elementor .fernando-section-alt .fernando-content{
-    grid-column:1;
-    grid-row:2;
-  }
+  .bbg-elementor .fernando-section-alt .fernando-shell{grid-template-columns:1fr;}
+  .bbg-elementor .fernando-section-alt .fernando-portrait{grid-column:1;grid-row:1;}
+  .bbg-elementor .fernando-section-alt .fernando-content{grid-column:1;grid-row:2;}
 }
 '''
 
@@ -126,9 +79,14 @@ jobs:
           html = html.replace(marker, css + '\n</style>\n<div class="bbg-elementor">', 1)
 
           path.write_text(html, encoding='utf-8')
+          PY
 
       - name: Commit restored sections
         run: |
+          if git diff --quiet -- index.html; then
+            echo "No index changes"
+            exit 0
+          fi
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add index.html
