@@ -2599,70 +2599,125 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
   const timeline = root.querySelector('.bridge-statement');
   const timelineVideo = timeline?.querySelector('video');
   const timelineSteps = timeline ? [...timeline.querySelectorAll('.js-scrub-step')] : [];
-  const timelineRevealItem = revealItems.find((item) => item.heading === timeline?.querySelector('h2'));
-  let framePending = false;
-  let seekFrameId = 0;
+  const cssDrivesTimelineProgress = Boolean(window.CSS?.supports?.('animation-timeline: view()'));
+  const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  const minimumSeekInterval = coarsePointer ? 80 : 48;
+  const seekTolerance = coarsePointer ? 0.075 : 0.04;
+  let timelineTop = 0;
+  let timelineDistance = 1;
+  let timelineVisible = true;
+  let timelineFramePending = false;
+  let timelineMeasurePending = false;
+  let timelineSeekFrame = 0;
+  let timelineSeekTimer = 0;
   let targetTimelineTime = 0;
-  let lastSeekAt = 0;
+  let lastTimelineSeekAt = -Infinity;
+  let activeTimelineStep = -1;
 
-  const renderTimelineFrame = (now) => {
-    seekFrameId = 0;
-    if (!timelineVideo || !Number.isFinite(timelineVideo.duration) || timelineVideo.duration <= 0) return;
+  const measureTimeline = () => {
+    timelineMeasurePending = false;
+    if (!timeline) return;
+    const rect = timeline.getBoundingClientRect();
+    timelineTop = window.scrollY + rect.top;
+    timelineDistance = Math.max(1, timeline.offsetHeight - window.innerHeight);
+  };
+
+  const requestTimelineMeasure = () => {
+    if (timelineMeasurePending) return;
+    timelineMeasurePending = true;
+    window.requestAnimationFrame(() => {
+      measureTimeline();
+      requestTimelineUpdate();
+    });
+  };
+
+  const applyLatestTimelineSeek = (now = performance.now()) => {
+    timelineSeekFrame = 0;
+    if (!timelineVideo || !timelineVisible || document.hidden) return;
+    if (!Number.isFinite(timelineVideo.duration) || timelineVideo.duration <= 0) return;
+    if (timelineVideo.seeking) return;
 
     const current = Number.isFinite(timelineVideo.currentTime) ? timelineVideo.currentTime : 0;
-    const difference = targetTimelineTime - current;
-    if (Math.abs(difference) < 0.012) {
-      try { timelineVideo.currentTime = targetTimelineTime; } catch (_) {}
+    if (Math.abs(targetTimelineTime - current) <= seekTolerance) return;
+
+    const wait = minimumSeekInterval - (now - lastTimelineSeekAt);
+    if (wait > 0) {
+      if (!timelineSeekTimer) {
+        timelineSeekTimer = window.setTimeout(() => {
+          timelineSeekTimer = 0;
+          requestTimelineSeek();
+        }, wait);
+      }
       return;
     }
 
-    if (now - lastSeekAt >= 30) {
-      const durationRatio = Math.min(1, Math.abs(difference) / timelineVideo.duration);
-      const easing = 0.14 + durationRatio * 0.18;
-      try { timelineVideo.currentTime = current + difference * easing; } catch (_) {}
-      lastSeekAt = now;
-    }
-    seekFrameId = window.requestAnimationFrame(renderTimelineFrame);
+    lastTimelineSeekAt = now;
+    try {
+      timelineVideo.currentTime = targetTimelineTime;
+    } catch (_) {}
   };
 
-  const requestSmoothSeek = () => {
-    if (!seekFrameId) seekFrameId = window.requestAnimationFrame(renderTimelineFrame);
+  const requestTimelineSeek = () => {
+    if (!timelineSeekFrame) {
+      timelineSeekFrame = window.requestAnimationFrame(applyLatestTimelineSeek);
+    }
   };
 
   const updateTimeline = () => {
-    framePending = false;
-    if (!timeline) return;
+    timelineFramePending = false;
+    if (!timeline || !timelineVisible) return;
 
-    const rect = timeline.getBoundingClientRect();
-    const scrollableDistance = Math.max(1, timeline.offsetHeight - window.innerHeight);
-    const rawProgress = Math.min(1, Math.max(0, -rect.top / scrollableDistance));
-    const progress = rawProgress * rawProgress * (3 - 2 * rawProgress);
-    const activeIndex = Math.min(timelineSteps.length - 1, Math.floor(rawProgress * timelineSteps.length));
+    const rawProgress = Math.min(1, Math.max(0, (window.scrollY - timelineTop) / timelineDistance));
+    const easedProgress = rawProgress * rawProgress * (3 - 2 * rawProgress);
+    const nextStep = Math.min(timelineSteps.length - 1, Math.floor(rawProgress * timelineSteps.length));
 
-    timeline.style.setProperty('--scroll-progress', rawProgress.toFixed(4));
-    setRevealProgress(timelineRevealItem, rawProgress);
-    timelineSteps.forEach((step, index) => {
-      step.classList.toggle('is-active', index === activeIndex);
-      step.classList.toggle('is-complete', index < activeIndex);
-    });
+    if (!cssDrivesTimelineProgress) {
+      timeline.style.setProperty('--scroll-progress', rawProgress.toFixed(4));
+    }
+
+    if (nextStep !== activeTimelineStep) {
+      activeTimelineStep = nextStep;
+      timelineSteps.forEach((step, index) => {
+        step.classList.toggle('is-active', index === nextStep);
+        step.classList.toggle('is-complete', index < nextStep);
+      });
+    }
 
     if (timelineVideo && Number.isFinite(timelineVideo.duration) && timelineVideo.duration > 0) {
-      targetTimelineTime = Math.min(timelineVideo.duration - 0.04, progress * timelineVideo.duration);
-      requestSmoothSeek();
+      targetTimelineTime = Math.min(timelineVideo.duration - 0.04, easedProgress * timelineVideo.duration);
+      requestTimelineSeek();
     }
   };
 
-  const requestTimelineUpdate = () => {
-    if (framePending) return;
-    framePending = true;
+  function requestTimelineUpdate() {
+    if (timelineFramePending || !timelineVisible) return;
+    timelineFramePending = true;
     window.requestAnimationFrame(updateTimeline);
-  };
+  }
+
+  if (timeline && 'IntersectionObserver' in window) {
+    const timelineObserver = new IntersectionObserver(([entry]) => {
+      timelineVisible = entry.isIntersecting;
+      if (timelineVisible) {
+        requestTimelineMeasure();
+        requestTimelineUpdate();
+      }
+    }, { rootMargin: '100% 0px 100% 0px' });
+    timelineObserver.observe(timeline);
+  }
 
   window.addEventListener('scroll', requestTimelineUpdate, { passive: true });
-  window.addEventListener('resize', requestTimelineUpdate, { passive: true });
-  timelineVideo?.addEventListener('loadedmetadata', requestTimelineUpdate);
-  timelineVideo?.addEventListener('loadeddata', requestTimelineUpdate);
-  timelineVideo?.addEventListener('canplay', requestTimelineUpdate);
+  window.addEventListener('resize', requestTimelineMeasure, { passive: true });
+  window.addEventListener('orientationchange', requestTimelineMeasure, { passive: true });
+  timelineVideo?.addEventListener('loadedmetadata', () => {
+    timelineVideo.pause();
+    requestTimelineMeasure();
+  });
+  timelineVideo?.addEventListener('seeked', requestTimelineSeek);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) requestTimelineUpdate();
+  });
+  measureTimeline();
   requestTimelineUpdate();
 
   root.querySelector('.prime-contact form')?.addEventListener('submit', (event) => {
@@ -2711,7 +2766,7 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
     if (mediaUnlockPending) return;
     mediaUnlockPending = true;
 
-    const attempts = mediaVideos.map((video) => {
+    const attempts = mediaVideos.filter((video) => video !== timelineVideo).map((video) => {
       const playPromise = playBackgroundVideo(video);
       if (!playPromise?.then) {
         if (video === timelineVideo) video.pause();
@@ -2942,6 +2997,51 @@ transform-origin:center top!important;transition:none!important;will-change:tran
   .bbg-elementor .bridge-timeline ol{gap:10px 14px!important}
   .bbg-elementor .bridge-timeline li{grid-template-columns:22px minmax(0,1fr)!important;min-height:54px!important}
   .bbg-elementor .bridge-timeline li small{font-size:8px!important;line-height:1.25!important}
+}
+</style>
+
+<style id="bbg-timeline-performance-v2">
+@property --scroll-progress{
+  syntax:"<number>";
+  inherits:true;
+  initial-value:0;
+}
+.bbg-elementor .bridge-statement{
+  view-timeline-name:--bbg-bridge-view;
+  view-timeline-axis:block;
+}
+.bbg-elementor .bridge-statement-stage{
+  contain:layout paint;
+}
+.bbg-elementor .bridge-statement video{
+  transform:translateZ(0);
+  backface-visibility:hidden;
+  will-change:contents;
+}
+@supports (animation-timeline:view()){
+  .bbg-elementor .bridge-statement-stage{
+    animation:bbg-bridge-css-progress 1ms linear both;
+    animation-timeline:--bbg-bridge-view;
+    animation-range:contain 0% contain 100%;
+  }
+  .bbg-elementor .bridge-statement-copy{
+    animation:bbg-bridge-copy-in 1ms linear both;
+    animation-timeline:--bbg-bridge-view;
+    animation-range:contain 0% contain 18%;
+  }
+}
+.bbg-elementor .bridge-statement .reveal-word{
+  color:inherit!important;
+  background:none!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+@keyframes bbg-bridge-copy-in{
+  from{opacity:.72;transform:translate3d(0,14px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes bbg-bridge-css-progress{
+  from{--scroll-progress:0}
+  to{--scroll-progress:1}
 }
 </style>
 <script id="bbg-number-counter-v1">
