@@ -1,0 +1,31 @@
+name: Remove Fernando section gaps
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix-spacing:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove spacing between Fernando sections
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'fernando-sections-no-gap'
+          if marker not in s:
+              css = '''\n<style id="fernando-sections-no-gap">\n.bbg-elementor .fernando-section{padding-top:0!important;padding-bottom:0!important;}\n</style>\n'''
+              s = s.replace('</head>', css + '</head>', 1)
+              p.write_text(s, encoding='utf-8')
+      - name: Commit spacing fix
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Remove gaps between Fernando sections"
+          git push
