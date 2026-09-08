@@ -2733,94 +2733,101 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 
 <script id="bbg-model-carousel-script">
 (() => {
- const start=()=>{
-  const root=document.querySelector('.bbg-elementor');
-  const rail=root?.querySelector('#modelos.feature-grid');
-  if(!rail) return;
+  const start = () => {
+    const root = document.querySelector('.bbg-elementor');
+    const rail = root?.querySelector('#modelos.feature-grid');
+    if (!rail || rail.dataset.loopReady === '1') return;
+    rail.dataset.loopReady = '1';
 
-  rail.querySelectorAll(':scope > [data-marquee-clone]').forEach(card=>card.remove());
-  const originals=[...rail.querySelectorAll(':scope > .model-row')].slice(0,4);
-  if(originals.length!==4) return;
+    const originals = [...rail.querySelectorAll(':scope > .model-row')].slice(0, 4);
+    if (!originals.length) return;
+    originals.forEach((card) => rail.appendChild(card.cloneNode(true)));
 
-  originals.forEach(card=>{
-   const clone=card.cloneNode(true);
-   clone.dataset.marqueeClone='true';
-   clone.setAttribute('aria-hidden','true');
-   rail.appendChild(clone);
-  });
+    let pausedByHover = false;
+    let dragging = false;
+    let dragged = false;
+    let startX = 0;
+    let startScroll = 0;
+    let raf = 0;
+    let last = performance.now();
+    const speed = 18;
 
-  let paused=false;
-  let dragging=false;
-  let dragged=false;
-  let startX=0;
-  let startScroll=0;
-  let frame=0;
-  let previous=performance.now();
-  const speed=26;
+    const normalize = () => {
+      const firstClone = rail.children[originals.length];
+      if (!firstClone) return;
+      const loopWidth = firstClone.offsetLeft - rail.children[0].offsetLeft;
+      if (loopWidth <= 0) return;
+      while (rail.scrollLeft >= loopWidth) rail.scrollLeft -= loopWidth;
+      while (rail.scrollLeft < 0) rail.scrollLeft += loopWidth;
+    };
 
-  const cycleWidth=()=>{
-   const firstClone=rail.querySelector(':scope > [data-marquee-clone]');
-   return firstClone ? firstClone.offsetLeft-originals[0].offsetLeft : 0;
+    const tick = (now) => {
+      const dt = Math.min(40, now - last);
+      last = now;
+      if (!pausedByHover && !dragging) {
+        rail.scrollLeft += speed * dt / 1000;
+        normalize();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    const allCards = () => [...rail.querySelectorAll(':scope > .model-row')];
+    allCards().forEach((card) => {
+      card.addEventListener('mouseenter', () => { pausedByHover = true; });
+      card.addEventListener('mouseleave', () => { pausedByHover = false; });
+    });
+
+    rail.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      dragging = true;
+      dragged = false;
+      startX = event.clientX;
+      startScroll = rail.scrollLeft;
+      rail.classList.add('is-dragging');
+      rail.setPointerCapture?.(event.pointerId);
+    });
+
+    rail.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      const delta = event.clientX - startX;
+      if (Math.abs(delta) > 4) dragged = true;
+      rail.scrollLeft = startScroll - delta;
+      normalize();
+      event.preventDefault();
+    });
+
+    const endDrag = (event) => {
+      if (!dragging) return;
+      dragging = false;
+      rail.classList.remove('is-dragging');
+      rail.releasePointerCapture?.(event.pointerId);
+      normalize();
+    };
+
+    rail.addEventListener('pointerup', endDrag);
+    rail.addEventListener('pointercancel', endDrag);
+    rail.addEventListener('pointerleave', (event) => {
+      if (dragging) endDrag(event);
+    });
+
+    rail.addEventListener('focusin', () => { pausedByHover = true; });
+    rail.addEventListener('focusout', () => { pausedByHover = false; });
+
+    rail.addEventListener('click', (event) => {
+      const link = event.target.closest('.model-card-link');
+      if (link) {
+        event.preventDefault();
+        if (dragged) event.stopPropagation();
+      }
+      dragged = false;
+    }, true);
+
+    raf = requestAnimationFrame(tick);
+    window.addEventListener('pagehide', () => cancelAnimationFrame(raf), { once:true });
   };
-  const normalize=()=>{
-   const width=cycleWidth();
-   if(width<=0) return;
-   while(rail.scrollLeft>=width) rail.scrollLeft-=width;
-   while(rail.scrollLeft<0) rail.scrollLeft+=width;
-  };
-  const animate=now=>{
-   const elapsed=Math.min(48,now-previous);
-   previous=now;
-   if(!paused&&!dragging){
-    rail.scrollLeft+=speed*elapsed/1000;
-    normalize();
-   }
-   frame=requestAnimationFrame(animate);
-  };
 
-  rail.addEventListener('pointerenter',()=>{paused=true});
-  rail.addEventListener('pointerleave',()=>{paused=false});
-  rail.addEventListener('focusin',()=>{paused=true});
-  rail.addEventListener('focusout',()=>{paused=false});
-  rail.addEventListener('pointerdown',event=>{
-   if(event.pointerType==='mouse'&&event.button!==0) return;
-   dragging=true;
-   dragged=false;
-   startX=event.clientX;
-   startScroll=rail.scrollLeft;
-   rail.classList.add('is-dragging');
-   rail.setPointerCapture?.(event.pointerId);
-  });
-  rail.addEventListener('pointermove',event=>{
-   if(!dragging) return;
-   const distance=event.clientX-startX;
-   if(Math.abs(distance)>4) dragged=true;
-   rail.scrollLeft=startScroll-distance;
-   normalize();
-   event.preventDefault();
-  });
-  const finish=event=>{
-   if(!dragging) return;
-   dragging=false;
-   rail.classList.remove('is-dragging');
-   try{rail.releasePointerCapture?.(event.pointerId)}catch(_){}
-   normalize();
-  };
-  rail.addEventListener('pointerup',finish);
-  rail.addEventListener('pointercancel',finish);
-  rail.addEventListener('click',event=>{
-   const link=event.target.closest('.model-card-link');
-   if(!link) return;
-   event.preventDefault();
-   if(dragged) event.stopPropagation();
-   dragged=false;
-  },true);
-  window.addEventListener('resize',normalize,{passive:true});
-  frame=requestAnimationFrame(animate);
-  window.addEventListener('pagehide',()=>cancelAnimationFrame(frame),{once:true});
- };
- if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true});
- else start();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
+  else start();
 })();
 </script>
 <style id="bbg-leadership-layout-v2">
