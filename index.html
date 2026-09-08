@@ -2624,5 +2624,18 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 })();
 </script>
 
+
+<script id="bbg-leadership-name-fix">
+(() => {
+  const applyNames = () => {
+    const second = document.getElementById('fernando-title-2');
+    const third = document.getElementById('fernando-title-3');
+    if (second) second.textContent = 'Diogo';
+    if (third) third.textContent = 'Carlos';
+  };
+  applyNames();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyNames, { once:true });
+})();
+</script>
 </body>
 </html>
