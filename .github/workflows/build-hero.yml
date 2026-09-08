@@ -17,15 +17,23 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/frantto-ofc/bbg-site/main/index.html -o index.html
           python3 - <<'PY'
           from pathlib import Path
-          import re
           p=Path('index.html')
           s=p.read_text()
-          new='https://res.cloudinary.com/lrs5yocs/video/upload/v1788830397/bbg/hero-video-20260908.mp4'
-          s,n=re.subn(r'https://[^\"\']*/media/hero/bbg-current-hero\.mp4',new,s)
-          if not n:
+          new='https://lime-chinchilla-401530.hostingersite.com/wp-content/uploads/2026/09/939CD7B5-391D-40DD-AF10-D3F40CDB092F.mp4'
+          old='/media/hero/bbg-current-hero.mp4'
+          if old not in s:
               raise SystemExit('Hero video source not found')
+          s=s.replace(old,new,1)
+          base='https://bbg-site.vercel.app'
+          s=s.replace('src="/media/',f'src="{base}/media/')
+          s=s.replace('poster="/media/',f'poster="{base}/media/')
+          s=s.replace('url(/media/',f'url({base}/media/')
+          s=s.replace('src="/logo-bbg.svg"',f'src="{base}/logo-bbg.svg"')
+          s=s.replace('url(/_next/',f'url({base}/_next/')
+          css='''<style id="hero-card-80">\n.bbg-elementor .secondary-hero-card{transform:scale(.8);transform-origin:right center;}\n.bbg-elementor .secondary-hero-card-content h3{margin-bottom:0;}\n@media(max-width:900px){.bbg-elementor .secondary-hero-card{transform-origin:center center;}}\n</style>'''
+          s=s.replace('</head>',css+'</head>',1)
           p.write_text(s)
-          print('replaced',n)
+          print('Hero updated to Hostinger MP4; card scaled to 80%')
           PY
       - name: Commit preview source
         run: |
