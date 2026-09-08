@@ -9,6 +9,16 @@ if (leadershipSections.length !== 3) {
   throw new Error(`Expected 3 leadership sections, found ${leadershipSections.length}.`);
 }
 
-fs.mkdirSync('dist', { recursive: true });
-fs.writeFileSync('dist/index.html', html);
-console.log('Built dist/index.html with 3 leadership sections.');
+const outputPath = path.resolve('dist');
+fs.mkdirSync(outputPath, { recursive: true });
+fs.writeFileSync(path.join(outputPath, 'index.html'), html);
+
+const mediaSource = path.resolve('media');
+if (fs.existsSync(mediaSource)) {
+  fs.cpSync(mediaSource, path.join(outputPath, 'media'), {
+    recursive: true,
+    force: true,
+  });
+}
+
+console.log('Built dist with index.html, leadership sections, and local media.');
