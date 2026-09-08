@@ -1,0 +1,46 @@
+name: Optimize timeline scrub video
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/optimize-timeline-video.yml
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Build seek-friendly timeline video
+        run: |
+          mkdir -p media
+          curl --fail --location --retry 3             "https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app/media/hero/bbg-hero.mp4"             --output /tmp/bbg-timeline-source.mp4
+          ffmpeg -hide_banner -loglevel error -y             -i /tmp/bbg-timeline-source.mp4             -an -c:v libx264 -preset medium -crf 22 -pix_fmt yuv420p             -g 6 -keyint_min 6 -sc_threshold 0             -movflags +faststart             media/timeline-scrub.mp4
+          keyframes="$(ffprobe -v error -skip_frame nokey -select_streams v:0             -show_entries frame=best_effort_timestamp_time -of csv=p=0             media/timeline-scrub.mp4 | wc -l)"
+          test "$keyframes" -ge 20
+
+      - name: Point the timeline to the optimized asset
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("index.html")
+          html = path.read_text(encoding="utf-8")
+          old = "https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app/media/hero/bbg-hero.mp4"
+          html = html.replace(old, "/media/timeline-scrub.mp4")
+          path.write_text(html, encoding="utf-8")
+          PY
+
+      - name: Commit optimized timeline media
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add index.html media/timeline-scrub.mp4
+          git commit -m "Add seek-friendly timeline video"
+          git push
