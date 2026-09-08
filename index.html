@@ -2848,32 +2848,24 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 </script>
 <script id="bbg-leadership-parallax-v3">
 (() => {
-  const root = document.querySelector('.bbg-elementor');
-  if (!root) return;
-  const portraits = [...root.querySelectorAll('.fernando-portrait img')];
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let framePending = false;
-
+  const portraits = [...document.querySelectorAll('.bbg-elementor .fernando-portrait img')];
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let pending = false;
   const update = () => {
-    framePending = false;
-    if (reducedMotion) return;
-    portraits.forEach((image) => {
+    pending = false;
+    portraits.forEach(image => {
       const rect = image.closest('.fernando-portrait').getBoundingClientRect();
-      const travel = window.innerHeight + rect.height;
-      const progress = Math.min(1, Math.max(0, (window.innerHeight - rect.top) / travel));
-      image.style.setProperty('--fernando-parallax-y', `${((progress - 0.5) * 72).toFixed(2)}px`);
+      const progress = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height)));
+      image.style.setProperty('--bbg-portrait-offset', (motion.matches ? 0 : -32 * progress).toFixed(2) + 'px');
     });
   };
-
-  const requestUpdate = () => {
-    if (framePending || !portraits.length) return;
-    framePending = true;
-    window.requestAnimationFrame(update);
+  const schedule = () => {
+    if (!pending) { pending = true; requestAnimationFrame(update); }
   };
-
-  window.addEventListener('scroll', requestUpdate, { passive: true });
-  window.addEventListener('resize', requestUpdate, { passive: true });
-  requestUpdate();
+  window.addEventListener('scroll', schedule, {passive:true});
+  window.addEventListener('resize', schedule);
+  motion.addEventListener('change', schedule);
+  schedule();
 })();
 </script>
 <style id="bbg-model-marquee-v5">
@@ -2914,6 +2906,17 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 .bbg-elementor .fernando-section .fernando-milestones dt{font-size:14px!important;margin-bottom:6px!important}
 .bbg-elementor .fernando-section .fernando-milestones dd{font-size:9px!important}
 .bbg-elementor .fernando-section .fernando-portrait img{object-position:center 18%!important}
+}
+</style>
+<style id="bbg-portrait-top-entry">
+.bbg-elementor .fernando-section .fernando-portrait img{
+top:0!important;bottom:auto!important;height:calc(100% + 32px)!important;
+object-fit:cover!important;object-position:center top!important;
+transform:translate3d(0,var(--bbg-portrait-offset,0px),0)!important;
+transform-origin:center top!important;transition:none!important;will-change:transform;
+}
+@media(prefers-reduced-motion:reduce){
+.bbg-elementor .fernando-section .fernando-portrait img{transform:none!important}
 }
 </style>
 </body>
