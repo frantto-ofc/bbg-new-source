@@ -39,6 +39,24 @@
 .bbg-elementor .footer-contact-link{display:inline-flex!important;align-items:center;gap:9px}
 .bbg-elementor .footer-contact-link svg{width:15px;height:15px;flex:0 0 15px;color:#AE9C6E;stroke:currentColor}
 </style>
+
+<style id="bbg-model-carousel-updates">
+.bbg-elementor .feature-grid{display:flex!important;gap:18px!important;overflow-x:hidden!important;overflow-y:hidden!important;border-top:0!important;border-bottom:0!important;padding:8px 0 18px!important;scrollbar-width:none;position:relative}
+.bbg-elementor .feature-grid::-webkit-scrollbar{display:none}
+.bbg-elementor .feature-row.model-row{flex:0 0 clamp(280px,31vw,390px)!important;display:flex!important;flex-direction:column!important;grid-template-columns:none!important;min-height:620px!important;padding:0!important;border:1px solid #3d3d49!important;border-radius:12px!important;background:#1e1e2a!important;overflow:hidden!important;position:relative!important}
+.bbg-elementor .feature-row.model-row>span{position:absolute!important;z-index:4!important;top:18px!important;left:18px!important;color:#fff!important;background:#171721b8!important;border:1px solid #ffffff2b!important;border-radius:999px!important;padding:7px 10px!important;font-size:10px!important;backdrop-filter:blur(8px)}
+.bbg-elementor .feature-row.model-row>div{display:flex!important;flex-direction:column!important;flex:0 0 auto!important}
+.bbg-elementor .feature-row.model-row small{order:2!important;padding:18px 22px 0!important;color:#858592!important}
+.bbg-elementor .feature-row.model-row h3{order:3!important;max-width:none!important;margin:8px 22px 0!important;color:#AE9C6E!important;font-size:28px!important;line-height:1.06!important}
+.bbg-elementor .feature-row.model-row .model-mobile-image{order:1!important;width:100%!important;aspect-ratio:4/3!important;margin:0!important;border-radius:0!important;overflow:hidden!important}
+.bbg-elementor .feature-row.model-row .model-mobile-image img{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:0!important}
+.bbg-elementor .feature-row.model-row>p{grid-column:auto!important;grid-row:auto!important;margin:20px 22px 26px!important;padding:0!important;color:#c3c3cc!important;font-size:13px!important;line-height:1.6!important;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}
+.bbg-elementor .model-card-link{position:absolute;z-index:5;inset:0;display:block!important;cursor:pointer}
+.bbg-elementor .secondary-hero-card{cursor:pointer}
+.bbg-elementor .secondary-hero-button .arrow-glyph{transition:transform .45s cubic-bezier(.22,1,.36,1)}
+@media(hover:hover){.bbg-elementor .secondary-hero-button-outline:hover .arrow-glyph{transform:rotate(45deg)}}
+@media(max-width:680px){.bbg-elementor .feature-row.model-row{flex-basis:82vw!important;min-height:570px!important}.bbg-elementor .feature-row.model-row>p{-webkit-line-clamp:6}}
+</style>
 </head>
 <body>
 <!--
@@ -1831,18 +1849,18 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
       <p>Construção de casas, para morar e investir,<br />com alta rentabilidade em dólar.</p>
       <h2 id="secondary-hero-title">Construímos o imóvel ideal pra você morar ou investir na Flórida</h2>
       <div class="secondary-hero-actions">
-        <a class="secondary-hero-button secondary-hero-button-primary" href="#contato">Pedir orçamento</a>
-        <a class="secondary-hero-button secondary-hero-button-outline" href="#modelos">Ver modelos <span aria-hidden="true">⟶</span></a>
+        <a class="secondary-hero-button secondary-hero-button-primary button button-primary" href="#contato">Pedir orçamento</a>
+        <a class="secondary-hero-button secondary-hero-button-outline" href="#modelos">Ver modelos <span class="arrow-glyph" aria-hidden="true">↗︎</span></a>
       </div>
     </div>
-    <article class="secondary-hero-card">
+    <a class="secondary-hero-card" href="#noticia-financiamento" aria-label="Ir para a notícia sobre financiamento">
       <img src="https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app/media/primestone/project-build.png" alt="Construção residencial em estrutura de madeira na Flórida" loading="lazy" decoding="async" />
       <div class="secondary-hero-card-shade"></div>
       <div class="secondary-hero-card-content">
         <span>Financiamento</span>
         <h3>Soluções Inteligentes de Financiamento para Construção</h3>
       </div>
-    </article>
+    </a>
   </div>
 </section>
 <section class="product-overview section" id="negocio">
@@ -1853,6 +1871,7 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 </div>
 <div class="feature-grid" id="modelos">
 <article class="feature-row model-row" data-model-image="https://bbg-developments.com/wp-content/uploads/2023/03/house1580-40-scaled.jpg" data-model-name="Modelo Agate">
+<a class="model-card-link" href="#" aria-label="Abrir Modelo Agate"></a>
 <span>01</span>
 <div>
 <small>1.580 sq ft · 4 quartos · 2 banheiros</small>
@@ -1862,6 +1881,7 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 <p>Este modelo oferece um estilo moderno com 4 quartos confortáveis e 2 banheiros, um espaçoso plano aberto onde você pode receber grandes reuniões familiares e uma cozinha completa com todos os utensílios de aço inoxidável, incluindo geladeira, fogão, descarte, lava-louças e micro-ondas, uma ilha e grande espaço do armário. Lindas bancadas em granito tanto na cozinha quanto nos banheiros, e piso de ladrilho instalado em todos os cômodos e salas, ótimo para facilitar a manutenção.</p>
 </article>
 <article class="feature-row model-row" data-model-image="https://bbg-developments.com/wp-content/uploads/2025/10/42-5U6A8553-scaled.jpg" data-model-name="Modelo Emerald (Casa Modelo)">
+<a class="model-card-link" href="#" aria-label="Abrir Modelo Emerald (Casa Modelo)"></a>
 <span>02</span>
 <div>
 <small>1.827 sq ft · 4 quartos · 3 banheiros</small>
@@ -1871,6 +1891,7 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 <p>Este modelo oferece um estilo moderno com 4 quartos confortáveis e 3 banheiros, um espaçoso plano aberto onde você pode receber grandes reuniões familiares e uma cozinha completa com todos os utensílios de aço inoxidável, incluindo geladeira, fogão, descarte, lava-louças e micro-ondas, uma ilha e grande espaço do armário. Lindas bancadas em granito tanto na cozinha quanto nos banheiros, e piso de ladrilho instalado em todos os cômodos e salas, ótimo para facilitar a manutenção.</p>
 </article>
 <article class="feature-row model-row" data-model-image="https://bbg-developments.com/wp-content/uploads/2026/05/DJI_20260316101649_0443_D-scaled.jpg" data-model-name="Modelo Duplex">
+<a class="model-card-link" href="#" aria-label="Abrir Modelo Duplex"></a>
 <span>03</span>
 <div>
 <small>2.402 sq ft · 3 quartos · 2 banheiros por unidade</small>
@@ -1880,6 +1901,7 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 <p>Este incrível modelo duplex oferece 2 unidades com 3 quartos e 2 banheiros, um espaçoso plano aberto onde você pode receber grandes reuniões familiares e uma cozinha completa com todos os utensílios de aço inoxidável, incluindo geladeira, fogão, descarte, lava-louças e micro-ondas, uma ilha e grande espaço do armário. Lindas bancadas em granito tanto na cozinha quanto nos banheiros, e piso de ladrilho instalado em todos os cômodos e salas, ótimo para facilitar a manutenção.</p>
 </article>
 <article class="feature-row model-row" data-model-image="https://bbg-developments.com/wp-content/uploads/2025/10/01-5U6A8866-1-1.webp" data-model-name="Modelo Onyx">
+<a class="model-card-link" href="#" aria-label="Abrir Modelo Onyx"></a>
 <span>04</span>
 <div>
 <small>1.661 sq ft · 4 quartos · 2 banheiros</small>
@@ -2257,7 +2279,7 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 <a class="prime-text-link" href="https://bbg-developments.com/noticias/" target="_blank" rel="noreferrer">+ Notícias <span class="arrow-glyph" aria-hidden="true">↗︎</span>
 </a>
 </div>
-<article class="prime-article prime-article-image">
+<article class="prime-article prime-article-image" id="noticia-financiamento">
 <img alt="Obra residencial na Flórida" loading="lazy" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" sizes="(max-width: 680px) 100vw, 25vw" src="https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app/media/primestone/project-build.png"/>
 <span>Financiamento</span>
 <h3>Soluções Inteligentes de Financiamento para Construção</h3>
@@ -2625,16 +2647,43 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 </script>
 
 
-<script id="bbg-leadership-name-fix">
+
+<script id="bbg-model-carousel-script">
 (() => {
-  const applyNames = () => {
-    const second = document.getElementById('fernando-title-2');
-    const third = document.getElementById('fernando-title-3');
-    if (second) second.textContent = 'Diogo';
-    if (third) third.textContent = 'Carlos';
+  const start = () => {
+    const root = document.querySelector('.bbg-elementor');
+    const rail = root?.querySelector('#modelos.feature-grid');
+    if (!rail || rail.dataset.loopReady === '1') return;
+    rail.dataset.loopReady = '1';
+    const originals = [...rail.children];
+    originals.forEach((card) => rail.appendChild(card.cloneNode(true)));
+    let paused = false;
+    let raf = 0;
+    let last = performance.now();
+    const speed = 18;
+    const tick = (now) => {
+      const dt = Math.min(40, now - last);
+      last = now;
+      if (!paused) {
+        rail.scrollLeft += speed * dt / 1000;
+        const half = rail.scrollWidth / 2;
+        if (rail.scrollLeft >= half) rail.scrollLeft -= half;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    rail.addEventListener('mouseenter', () => { paused = true; });
+    rail.addEventListener('mouseleave', () => { paused = false; });
+    rail.addEventListener('focusin', () => { paused = true; });
+    rail.addEventListener('focusout', () => { paused = false; });
+    rail.addEventListener('click', (e) => {
+      const link = e.target.closest('.model-card-link');
+      if (link) e.preventDefault();
+    });
+    raf = requestAnimationFrame(tick);
+    window.addEventListener('pagehide', () => cancelAnimationFrame(raf), { once:true });
   };
-  applyNames();
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyNames, { once:true });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
+  else start();
 })();
 </script>
 </body>
