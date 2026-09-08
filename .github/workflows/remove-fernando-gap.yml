@@ -19,30 +19,20 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          # Keep the three leadership sections flush with each other.
           if 'fernando-sections-no-gap' not in s:
               css = '''\n<style id="fernando-sections-no-gap">\n.bbg-elementor .fernando-section{padding-top:0!important;padding-bottom:0!important;}\n</style>\n'''
               s = s.replace('</head>', css + '</head>', 1)
 
-          def rename_section(html, section_id, name):
-              pattern = re.compile(r'(<section\s+class="[^"]*fernando-section[^"]*"\s+id="' + re.escape(section_id) + r'".*?</section>)', re.S)
-              m = pattern.search(html)
-              if not m:
-                  return html
-              sec = m.group(1)
-              sec = re.sub(r'(<h2\s+id="[^"]+">)(.*?)(</h2>)', rf'\1{name}\3', sec, count=1, flags=re.S)
-              sec = re.sub(r'<figcaption>.*?</figcaption>', f'<figcaption>{name} · BBG Developments</figcaption>', sec, count=1, flags=re.S)
-              sec = re.sub(r'alt="[^"]*"', f'alt="{name}, liderança da BBG Developments"', sec, count=1)
-              sec = re.sub(r'aria-label="Marcos profissionais de [^"]+"', f'aria-label="Marcos profissionais de {name}"', sec, count=1)
-              return html[:m.start()] + sec + html[m.end():]
-
-          s = rename_section(s, 'fernando-2', 'Diogo')
-          s = rename_section(s, 'fernando-3', 'Carlos')
+          # Visible leadership names, in the requested order.
+          s = re.sub(r'(<h2\s+id="fernando-title-2">).*?(</h2>)', r'\1Diogo\2', s, count=1, flags=re.S)
+          s = re.sub(r'(<h2\s+id="fernando-title-3">).*?(</h2>)', r'\1Carlos\2', s, count=1, flags=re.S)
 
           # Minimalist footer icons in BBG gold.
           if 'bbg-footer-contact-icons' not in s:
               footer_css = '''\n<style id="bbg-footer-contact-icons">\n.bbg-elementor .footer-contact-link{display:inline-flex!important;align-items:center;gap:9px}\n.bbg-elementor .footer-contact-link svg{width:15px;height:15px;flex:0 0 15px;color:#AE9C6E;stroke:currentColor}\n</style>\n'''
               s = s.replace('</head>', footer_css + '</head>', 1)
+          else:
+              s = re.sub(r'(\.bbg-elementor \.footer-contact-link svg\{[^}]*color:)#[0-9A-Fa-f]{6}', r'\1#AE9C6E', s, count=1)
 
           instagram = '<a class="footer-contact-link" href="https://www.instagram.com/bbgdevelopments/" target="_blank" rel="noopener noreferrer" aria-label="Abrir o Instagram da BBG em uma nova guia"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke-width="1.7"/><circle cx="12" cy="12" r="4" stroke-width="1.7"/><circle cx="17.4" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg>Instagram</a>'
           whatsapp = '<a class="footer-contact-link" href="https://wa.me/14073715499" target="_blank" rel="noreferrer" aria-label="Conversar com a BBG pelo WhatsApp"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.5 11.7a8.5 8.5 0 0 1-12.6 7.45L3.5 20.5l1.4-4.25A8.5 8.5 0 1 1 20.5 11.7Z" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.2 7.8c.2-.45.42-.46.72-.47h.6c.2 0 .38.08.48.35l.73 1.77c.08.22.05.4-.08.58l-.55.7c-.13.16-.14.32-.04.5.53.96 1.3 1.72 2.24 2.26.2.11.36.1.5-.06l.75-.86c.16-.19.37-.23.58-.14l1.82.86c.22.1.34.27.34.49 0 .49-.22 1.17-.59 1.54-.47.47-1.17.7-1.86.7-1.03 0-2.35-.46-3.75-1.64-1.76-1.49-2.85-3.43-2.85-4.87 0-.72.25-1.28.5-1.71Z" fill="currentColor" stroke="none"/></svg>WhatsApp</a>'
@@ -61,5 +51,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Update leadership names and footer icons"
+          git commit -m "Fix leadership names and footer icons"
           git push
