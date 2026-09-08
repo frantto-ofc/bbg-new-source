@@ -45,14 +45,14 @@
 .bbg-elementor .feature-grid.is-dragging{cursor:grabbing}
 .bbg-elementor .feature-grid::-webkit-scrollbar{display:none}
 .bbg-elementor .feature-row.model-row{flex:0 0 clamp(280px,31vw,390px)!important;display:flex!important;flex-direction:column!important;grid-template-columns:none!important;min-height:620px!important;padding:0!important;border:1px solid #3d3d49!important;border-radius:12px!important;background:#1e1e2a!important;overflow:hidden!important;position:relative!important}
-.bbg-elementor .feature-row.model-row>span{position:absolute!important;z-index:4!important;top:18px!important;left:18px!important;color:#fff!important;background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;font-size:11px!important;backdrop-filter:none!important;box-shadow:none!important}
+.bbg-elementor .feature-row.model-row>span{position:absolute!important;z-index:6!important;top:18px!important;left:18px!important;width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;aspect-ratio:1/1!important;display:grid!important;place-items:center!important;color:#171721!important;background-color:#AE9C6E!important;background-image:none!important;border:0!important;outline:0!important;border-radius:999px!important;padding:0!important;font-size:11px!important;font-weight:600!important;line-height:1!important;backdrop-filter:none!important;box-shadow:none!important}.bbg-elementor .feature-row.model-row>span:before,.bbg-elementor .feature-row.model-row>span:after{content:none!important;display:none!important;border:0!important}
 .bbg-elementor .feature-row.model-row>div{display:flex!important;flex-direction:column!important;flex:0 0 auto!important}
 .bbg-elementor .feature-row.model-row small{order:2!important;padding:18px 22px 0!important;color:#858592!important}
 .bbg-elementor .feature-row.model-row h3{order:3!important;max-width:none!important;margin:8px 22px 0!important;color:#AE9C6E!important;font-size:28px!important;line-height:1.06!important}
 .bbg-elementor .feature-row.model-row .model-mobile-image{order:1!important;width:100%!important;aspect-ratio:4/3!important;margin:0!important;border-radius:0!important;overflow:hidden!important}
 .bbg-elementor .feature-row.model-row .model-mobile-image img{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:0!important;pointer-events:none}
 .bbg-elementor .feature-row.model-row>p{grid-column:auto!important;grid-row:auto!important;margin:20px 22px 26px!important;padding:0!important;color:#c3c3cc!important;font-size:13px!important;line-height:1.6!important;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}
-.bbg-elementor .model-card-link{position:absolute;z-index:5;inset:0;display:block!important;cursor:inherit}
+.bbg-elementor .model-card-link{position:absolute!important;z-index:5!important;inset:0!important;width:auto!important;height:auto!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;display:block!important;cursor:inherit}
 .bbg-elementor .secondary-hero-card{cursor:pointer}
 .bbg-elementor .secondary-hero-button .arrow-glyph{transition:transform .45s cubic-bezier(.22,1,.36,1)}
 @media(hover:hover){.bbg-elementor .secondary-hero-button-outline:hover .arrow-glyph{transform:rotate(45deg)}}
@@ -2674,7 +2674,7 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
     let startScroll = 0;
     let raf = 0;
     let last = performance.now();
-    const speed = 18;
+    const speed = 30;
 
     const normalize = () => {
       const firstClone = rail.children[originals.length];
