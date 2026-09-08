@@ -18,6 +18,11 @@ jobs:
         with:
           ref: main
 
+      - name: Install video encoder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
       - name: Build seek-friendly timeline video
         run: |
           mkdir -p media
