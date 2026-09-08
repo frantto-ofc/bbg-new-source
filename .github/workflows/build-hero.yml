@@ -1,0 +1,36 @@
+name: Build hero preview
+on:
+  push:
+    branches: [hero-video-20260908]
+permissions:
+  contents: write
+jobs:
+  build:
+    if: github.event.head_commit.message != 'Build hero preview source'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: hero-video-20260908
+      - name: Build source
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/frantto-ofc/bbg-site/main/index.html -o index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text()
+          new='https://res.cloudinary.com/lrs5yocs/video/upload/v1788830397/bbg/hero-video-20260908.mp4'
+          s,n=re.subn(r'https://[^\"\']*/media/hero/bbg-current-hero\.mp4',new,s)
+          if not n:
+              raise SystemExit('Hero video source not found')
+          p.write_text(s)
+          print('replaced',n)
+          PY
+      - name: Commit preview source
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add index.html
+          git commit -m 'Build hero preview source'
+          git push
