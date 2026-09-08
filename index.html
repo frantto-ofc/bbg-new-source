@@ -100,6 +100,28 @@
   max-height:3.2em!important;
 }
 </style>
+
+<style id="bbg-model-card-compact-hover">
+.bbg-elementor .feature-row.model-row{
+  min-height:500px!important;
+}
+.bbg-elementor .feature-row.model-row .model-mobile-image img{
+  transition:transform .7s cubic-bezier(.22,1,.36,1)!important;
+  transform:scale(1.001)!important;
+  will-change:transform;
+}
+@media (hover:hover){
+  .bbg-elementor .feature-row.model-row:hover .model-mobile-image img{
+    transform:scale(1.08)!important;
+  }
+}
+@media(max-width:680px){
+  .bbg-elementor .feature-row.model-row{min-height:480px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .bbg-elementor .feature-row.model-row .model-mobile-image img{transition:none!important}
+}
+</style>
 </head>
 <body>
 <!--
