@@ -18,8 +18,8 @@ jobs:
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          if 'id="fernando-2"' in s:
-              print('Fernando sections already restored')
+          if 'id="diogo"' in s and 'id="carlos"' in s:
+              print('Desired sections 1, 4 and 5 already exist; no duplicates created')
               raise SystemExit(0)
           a = s.find('<section class="fernando-section" id="fernando"')
           if a < 0:
