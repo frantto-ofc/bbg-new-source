@@ -1,57 +1,65 @@
 name: Build hero preview
 on:
   push:
-    branches: [hero-video-20260908]
+    branches: [main]
 permissions:
   contents: write
 jobs:
   build:
-    if: github.event.head_commit.message != 'Build hero preview source'
+    if: github.event.head_commit.message != 'Restore three Fernando sections'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: hero-video-20260908
-      - name: Build source from preserved production snapshot
+          ref: main
+      - name: Restore three Fernando sections
         run: |
-          curl -fsSL https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app -o index.html
           python3 - <<'PY'
           from pathlib import Path
-          import re
           p=Path('index.html')
-          s=p.read_text()
-          base='https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app'
-          new='https://res.cloudinary.com/lrs5yocs/video/upload/v1788830397/bbg/hero-video-20260908.mp4'
-
-          old='<source src="/media/hero/bbg-current-hero.mp4" type="video/mp4" />'
-          if old not in s:
-              raise SystemExit('Hero video source not found in preserved source')
-          s=s.replace(old, f'<source src="{new}" type="video/mp4" />', 1)
-
-          # Keep every other original asset exactly as published by the preserved Sep 4 snapshot.
-          s=s.replace('src="/media/', f'src="{base}/media/')
-          s=s.replace('poster="/media/', f'poster="{base}/media/')
-          s=s.replace('url(/media/', f'url({base}/media/')
-          s=s.replace('src="/logo-bbg.svg"', f'src="{base}/logo-bbg.svg"')
-          s=s.replace('href="/favicon.png"', f'href="{base}/favicon.png"')
-          s=s.replace('url(/_next/', f'url({base}/_next/')
-
-          # Remove only the description inside the financing card in the secondary hero.
-          hero_card = re.compile(r'(<article class="secondary-hero-card">.*?<div class="secondary-hero-card-content">.*?<h3>.*?</h3>)\s*<p>.*?</p>(\s*</div>\s*</article>)', re.S)
-          s, n = hero_card.subn(r'\1\2', s, count=1)
-          if n != 1:
-              raise SystemExit(f'Hero card description removal failed: {n}')
-
-          css='''<style id="hero-card-80">\n.bbg-elementor .secondary-hero-card{transform:scale(.8);transform-origin:right center;}\n.bbg-elementor .secondary-hero-card-content h3{margin-bottom:0;}\n@media(max-width:900px){.bbg-elementor .secondary-hero-card{transform-origin:center center;}}\n</style>'''
-          s=s.replace('</head>', css+'</head>', 1)
-
-          p.write_text(s)
-          print('Preserved Sep 4 source + new hero video + 80% card + hero description removed')
+          s=p.read_text(encoding='utf-8')
+          if 'id="fernando-2"' in s and 'id="fernando-3"' in s:
+              print('Fernando sections already restored')
+              raise SystemExit(0)
+          a=s.find('<section class="fernando-section" id="fernando"')
+          if a<0:
+              raise SystemExit('Fernando section not found')
+          b=s.find('</section>',a)
+          if b<0:
+              raise SystemExit('Fernando section end not found')
+          b+=len('</section>')
+          one=s[a:b]
+          two=one.replace('id="fernando"','id="fernando-2"',1).replace('aria-labelledby="fernando-title"','aria-labelledby="fernando-title-2"',1).replace('id="fernando-title"','id="fernando-title-2"',1).replace('class="fernando-section"','class="fernando-section fernando-section--inverse"',1)
+          three=one.replace('id="fernando"','id="fernando-3"',1).replace('aria-labelledby="fernando-title"','aria-labelledby="fernando-title-3"',1).replace('id="fernando-title"','id="fernando-title-3"',1)
+          s=s[:a]+one+'\n'+two+'\n'+three+s[b:]
+          css='''
+.bbg-elementor .fernando-section + .fernando-section{padding-top:0}
+.bbg-elementor .fernando-section--inverse{color:#111;background:#fff}
+.bbg-elementor .fernando-section--inverse .fernando-shell{background:#f0eee8;color:#111;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr)}
+.bbg-elementor .fernando-section--inverse .fernando-portrait{grid-column:2;grid-row:1}
+.bbg-elementor .fernando-section--inverse .fernando-content{grid-column:1;grid-row:1}
+.bbg-elementor .fernando-section--inverse .fernando-content .prime-label{color:#777}
+.bbg-elementor .fernando-section--inverse .fernando-content h2{color:#111}
+.bbg-elementor .fernando-section--inverse .fernando-role{color:#AE9C6E}
+.bbg-elementor .fernando-section--inverse .fernando-summary p{color:#555}
+.bbg-elementor .fernando-section--inverse .fernando-milestones{border-top-color:#1113}
+.bbg-elementor .fernando-section--inverse .fernando-milestones>div{border-right-color:#1113}
+.bbg-elementor .fernando-section--inverse .fernando-milestones dt{color:#111}
+.bbg-elementor .fernando-section--inverse .fernando-milestones dd{color:#666}
+.bbg-elementor .fernando-section--inverse .fernando-link{color:#111;border-bottom-color:#1118}
+@media(max-width:1000px){.bbg-elementor .fernando-section--inverse .fernando-shell{grid-template-columns:1fr}.bbg-elementor .fernando-section--inverse .fernando-portrait{grid-column:1;grid-row:1}.bbg-elementor .fernando-section--inverse .fernando-content{grid-column:1;grid-row:2}}
+'''
+          marker='</style>\n<div class="bbg-elementor">'
+          if marker not in s:
+              raise SystemExit('Style marker not found')
+          s=s.replace(marker,css+'\n</style>\n<div class="bbg-elementor">',1)
+          p.write_text(s,encoding='utf-8')
           PY
-      - name: Commit preview source
+      - name: Commit restored sections
         run: |
+          if git diff --quiet -- index.html; then exit 0; fi
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add index.html
-          git commit -m 'Build hero preview source'
+          git commit -m 'Restore three Fernando sections'
           git push
