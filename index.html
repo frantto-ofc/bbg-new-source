@@ -2405,6 +2405,12 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
   const root = document.currentScript.previousElementSibling;
   if (!root || !root.classList.contains('bbg-elementor')) return;
 
+  // BBG leadership names before reveal
+  const secondName = root.querySelector('#fernando-title-2');
+  const thirdName = root.querySelector('#fernando-title-3');
+  if (secondName) secondName.textContent = 'Diogo';
+  if (thirdName) thirdName.textContent = 'Carlos';
+
   root.classList.add('bbg-js');
 
   let favicon = document.head.querySelector('link[data-bbg-favicon]');
