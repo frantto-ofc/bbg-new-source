@@ -2028,74 +2028,6 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 </a>
 </div>
 </div>
-</section><section class="fernando-section fernando-section--alt" id="diogo" aria-labelledby="fernando-title-2">
-<div class="fernando-shell">
-<figure class="fernando-portrait">
-<img alt="Fernando Braff, fundador e CEO da BBG Developments" loading="lazy" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" sizes="(max-width: 1000px) 100vw, 48vw" src="https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app/media/fernando-braff.jpg"/>
-<span class="fernando-portrait-shade" aria-hidden="true">
-</span>
-<figcaption>Fernando Braff · BBG Developments</figcaption>
-</figure>
-<div class="fernando-content">
-<p class="prime-label">Liderança BBG</p>
-<h2 id="fernando-title-2">Diogo</h2>
-<p class="fernando-role">Fundador e CEO da BBG Group e da BBG Developments</p>
-<div class="fernando-summary">
-<p>Fernando chegou aos Estados Unidos em 1994 para estudar e iniciou sua carreira na área de finanças, antes de avançar para a administração de projetos e para a construção residencial.</p>
-<p>Hoje, Fernando conduz a estratégia da BBG na Flórida Central, conectando visão de investimento, execução e desenvolvimento de comunidades. Sob sua liderança, a empresa transforma terrenos em casas pensadas tanto para morar quanto para construir patrimônio em dólar.</p>
-</div>
-<dl class="fernando-milestones" aria-label="Marcos profissionais de Fernando Braff">
-<div>
-<dt>1994</dt>
-<dd>Chegada aos Estados Unidos para estudar</dd>
-</div>
-<div>
-<dt>Finanças</dt>
-<dd>Base estratégica antes da construção residencial</dd>
-</div>
-<div>
-<dt>Flórida</dt>
-<dd>Foco em moradia, investimento e desenvolvimento</dd>
-</div>
-</dl>
-<a class="fernando-link" href="https://www.linkedin.com/in/fernando-braff-23b331" target="_blank" rel="noreferrer">Conheça a trajetória no LinkedIn <span class="arrow-glyph" aria-hidden="true">↗︎</span>
-</a>
-</div>
-</div>
-</section><section class="fernando-section" id="carlos" aria-labelledby="fernando-title-3">
-<div class="fernando-shell">
-<figure class="fernando-portrait">
-<img alt="Fernando Braff, fundador e CEO da BBG Developments" loading="lazy" style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent" sizes="(max-width: 1000px) 100vw, 48vw" src="https://bbg-new-spacing-mobile-20260903-5tx5kxxxf-frantto-work.vercel.app/media/fernando-braff.jpg"/>
-<span class="fernando-portrait-shade" aria-hidden="true">
-</span>
-<figcaption>Fernando Braff · BBG Developments</figcaption>
-</figure>
-<div class="fernando-content">
-<p class="prime-label">Liderança BBG</p>
-<h2 id="fernando-title-3">Carlos</h2>
-<p class="fernando-role">Fundador e CEO da BBG Group e da BBG Developments</p>
-<div class="fernando-summary">
-<p>Fernando chegou aos Estados Unidos em 1994 para estudar e iniciou sua carreira na área de finanças, antes de avançar para a administração de projetos e para a construção residencial.</p>
-<p>Hoje, Fernando conduz a estratégia da BBG na Flórida Central, conectando visão de investimento, execução e desenvolvimento de comunidades. Sob sua liderança, a empresa transforma terrenos em casas pensadas tanto para morar quanto para construir patrimônio em dólar.</p>
-</div>
-<dl class="fernando-milestones" aria-label="Marcos profissionais de Fernando Braff">
-<div>
-<dt>1994</dt>
-<dd>Chegada aos Estados Unidos para estudar</dd>
-</div>
-<div>
-<dt>Finanças</dt>
-<dd>Base estratégica antes da construção residencial</dd>
-</div>
-<div>
-<dt>Flórida</dt>
-<dd>Foco em moradia, investimento e desenvolvimento</dd>
-</div>
-</dl>
-<a class="fernando-link" href="https://www.linkedin.com/in/fernando-braff-23b331" target="_blank" rel="noreferrer">Conheça a trajetória no LinkedIn <span class="arrow-glyph" aria-hidden="true">↗︎</span>
-</a>
-</div>
-</div>
 </section>
 <section class="prime-projects prime-section" id="atuacao">
 <div class="prime-heading-grid">
@@ -2733,101 +2665,95 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 
 <script id="bbg-model-carousel-script">
 (() => {
-  const start = () => {
-    const root = document.querySelector('.bbg-elementor');
-    const rail = root?.querySelector('#modelos.feature-grid');
-    if (!rail || rail.dataset.loopReady === '1') return;
-    rail.dataset.loopReady = '1';
+ const start=()=>{
+  const root=document.querySelector('.bbg-elementor');
+  const rail=root?.querySelector('#modelos.feature-grid');
+  if(!rail) return;
+  rail.dataset.loopReady='1';
 
-    const originals = [...rail.querySelectorAll(':scope > .model-row')].slice(0, 4);
-    if (!originals.length) return;
-    originals.forEach((card) => rail.appendChild(card.cloneNode(true)));
+  [...rail.querySelectorAll(':scope > .model-row[data-marquee-clone]')].forEach(card=>card.remove());
+  const originals=[...rail.querySelectorAll(':scope > .model-row')].slice(0,4);
+  if(originals.length!==4) return;
+  originals.forEach(card=>{
+   const clone=card.cloneNode(true);
+   clone.dataset.marqueeClone='true';
+   clone.setAttribute('aria-hidden','true');
+   rail.appendChild(clone);
+  });
 
-    let pausedByHover = false;
-    let dragging = false;
-    let dragged = false;
-    let startX = 0;
-    let startScroll = 0;
-    let raf = 0;
-    let last = performance.now();
-    const speed = 18;
+  let paused=false;
+  let dragging=false;
+  let dragged=false;
+  let startX=0;
+  let startScroll=0;
+  let raf=0;
+  let last=performance.now();
+  const speed=28;
 
-    const normalize = () => {
-      const firstClone = rail.children[originals.length];
-      if (!firstClone) return;
-      const loopWidth = firstClone.offsetLeft - rail.children[0].offsetLeft;
-      if (loopWidth <= 0) return;
-      while (rail.scrollLeft >= loopWidth) rail.scrollLeft -= loopWidth;
-      while (rail.scrollLeft < 0) rail.scrollLeft += loopWidth;
-    };
-
-    const tick = (now) => {
-      const dt = Math.min(40, now - last);
-      last = now;
-      if (!pausedByHover && !dragging) {
-        rail.scrollLeft += speed * dt / 1000;
-        normalize();
-      }
-      raf = requestAnimationFrame(tick);
-    };
-
-    const allCards = () => [...rail.querySelectorAll(':scope > .model-row')];
-    allCards().forEach((card) => {
-      card.addEventListener('mouseenter', () => { pausedByHover = true; });
-      card.addEventListener('mouseleave', () => { pausedByHover = false; });
-    });
-
-    rail.addEventListener('pointerdown', (event) => {
-      if (event.pointerType === 'mouse' && event.button !== 0) return;
-      dragging = true;
-      dragged = false;
-      startX = event.clientX;
-      startScroll = rail.scrollLeft;
-      rail.classList.add('is-dragging');
-      rail.setPointerCapture?.(event.pointerId);
-    });
-
-    rail.addEventListener('pointermove', (event) => {
-      if (!dragging) return;
-      const delta = event.clientX - startX;
-      if (Math.abs(delta) > 4) dragged = true;
-      rail.scrollLeft = startScroll - delta;
-      normalize();
-      event.preventDefault();
-    });
-
-    const endDrag = (event) => {
-      if (!dragging) return;
-      dragging = false;
-      rail.classList.remove('is-dragging');
-      rail.releasePointerCapture?.(event.pointerId);
-      normalize();
-    };
-
-    rail.addEventListener('pointerup', endDrag);
-    rail.addEventListener('pointercancel', endDrag);
-    rail.addEventListener('pointerleave', (event) => {
-      if (dragging) endDrag(event);
-    });
-
-    rail.addEventListener('focusin', () => { pausedByHover = true; });
-    rail.addEventListener('focusout', () => { pausedByHover = false; });
-
-    rail.addEventListener('click', (event) => {
-      const link = event.target.closest('.model-card-link');
-      if (link) {
-        event.preventDefault();
-        if (dragged) event.stopPropagation();
-      }
-      dragged = false;
-    }, true);
-
-    raf = requestAnimationFrame(tick);
-    window.addEventListener('pagehide', () => cancelAnimationFrame(raf), { once:true });
+  const loopWidth=()=>{
+   const clone=rail.querySelector(':scope > .model-row[data-marquee-clone]');
+   return clone ? clone.offsetLeft-originals[0].offsetLeft : 0;
+  };
+  const normalize=()=>{
+   const width=loopWidth();
+   if(width<=0) return;
+   if(rail.scrollLeft>=width) rail.scrollLeft%=width;
+   if(rail.scrollLeft<0) rail.scrollLeft=((rail.scrollLeft%width)+width)%width;
+  };
+  const tick=now=>{
+   const dt=Math.min(48,now-last);
+   last=now;
+   if(!paused&&!dragging){
+    rail.scrollLeft+=speed*dt/1000;
+    normalize();
+   }
+   raf=requestAnimationFrame(tick);
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once:true });
-  else start();
+  rail.addEventListener('mouseenter',()=>{paused=true});
+  rail.addEventListener('mouseleave',()=>{paused=false});
+  rail.addEventListener('focusin',()=>{paused=true});
+  rail.addEventListener('focusout',()=>{paused=false});
+
+  rail.addEventListener('pointerdown',event=>{
+   if(event.pointerType==='mouse'&&event.button!==0) return;
+   dragging=true;
+   dragged=false;
+   startX=event.clientX;
+   startScroll=rail.scrollLeft;
+   rail.classList.add('is-dragging');
+   rail.setPointerCapture?.(event.pointerId);
+  });
+  rail.addEventListener('pointermove',event=>{
+   if(!dragging) return;
+   const delta=event.clientX-startX;
+   if(Math.abs(delta)>4) dragged=true;
+   rail.scrollLeft=startScroll-delta;
+   normalize();
+   event.preventDefault();
+  });
+  const endDrag=event=>{
+   if(!dragging) return;
+   dragging=false;
+   rail.classList.remove('is-dragging');
+   try{rail.releasePointerCapture?.(event.pointerId)}catch(_){}
+   normalize();
+  };
+  rail.addEventListener('pointerup',endDrag);
+  rail.addEventListener('pointercancel',endDrag);
+  rail.addEventListener('click',event=>{
+   if(!event.target.closest('.model-card-link')) return;
+   event.preventDefault();
+   if(dragged) event.stopPropagation();
+   dragged=false;
+  },true);
+
+  window.addEventListener('resize',normalize,{passive:true});
+  raf=requestAnimationFrame(tick);
+  window.addEventListener('pagehide',()=>cancelAnimationFrame(raf),{once:true});
+ };
+ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true});
+ else start();
 })();
 </script>
 <style id="bbg-leadership-layout-v2">
@@ -2901,5 +2827,14 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
  update();
 })();
 </script>
+<style id="bbg-model-marquee-v4">
+.bbg-elementor #modelos.feature-grid{display:flex!important;gap:18px!important;overflow-x:hidden!important;overflow-y:hidden!important;scroll-behavior:auto!important;overscroll-behavior-x:contain!important;cursor:grab!important;touch-action:pan-y!important;user-select:none!important}
+.bbg-elementor #modelos.feature-grid.is-dragging{cursor:grabbing!important}
+.bbg-elementor #modelos.feature-grid>.model-row{flex:0 0 calc((100% - 54px)/4)!important;min-width:0!important}
+.bbg-elementor .model-card-link{position:absolute!important;inset:0!important;width:auto!important;height:auto!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.bbg-elementor .feature-row.model-row>span{z-index:6!important;width:38px!important;height:38px!important;display:grid!important;place-items:center!important;background:#AE9C6E!important;background-image:none!important;color:#171721!important;border:0!important;outline:0!important;border-radius:50%!important;box-shadow:none!important}
+@media(max-width:1100px){.bbg-elementor #modelos.feature-grid>.model-row{flex-basis:calc((100% - 36px)/3)!important}}
+@media(max-width:760px){.bbg-elementor #modelos.feature-grid>.model-row{flex-basis:82vw!important}}
+</style>
 </body>
 </html>
