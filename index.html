@@ -84,9 +84,11 @@
 </style>
 
 <style id="bbg-static-section-links">
-.bbg-elementor .ready-links .ready-model-name{border-bottom:1px solid #d8d8d4;justify-content:space-between;padding:18px 18px 18px 0;font-size:13px;display:flex;color:inherit}
+.bbg-elementor .ready-links .ready-model-name{border-bottom:1px solid #d8d8d4;justify-content:space-between;align-items:center;gap:24px;padding:18px 18px 18px 0;font-size:13px;display:flex;color:inherit}
 .bbg-elementor .ready-links .ready-model-name:nth-child(odd){border-right:1px solid #d8d8d4;padding-right:22px}
 .bbg-elementor .ready-links .ready-model-name:nth-child(even){padding-left:22px}
+.bbg-elementor .ready-links .ready-model-name .arrow-glyph{color:#AE9C6E;font-size:17px;transition:transform .3s cubic-bezier(.16,1,.3,1)}
+@media(hover:hover){.bbg-elementor .ready-links .ready-model-name:hover .arrow-glyph{transform:translate(4px,-4px)}}
 .bbg-elementor .bbg-static-link{cursor:default;pointer-events:none}
 @media(max-width:680px){.bbg-elementor .ready-links .ready-model-name:nth-child(odd),.bbg-elementor .ready-links .ready-model-name:nth-child(even){border-right:0;padding-left:0}}
 </style>
@@ -2305,22 +2307,21 @@ As imagens e os vídeos usam a versão publicada em bbg-developments.vercel.app.
 <p class="prime-label">Casas à venda</p>
 <div class="prime-lead">
 <h2>
-<span class="reveal-copy js-reveal-text" data-inverse="false" aria-label="Quero comprar uma casa pronta.">
+<span class="reveal-copy js-reveal-text" data-inverse="false" aria-label="Quero comprar a casa pronta.">
 <span class="reveal-word" aria-hidden="true">Quero </span>
 <span class="reveal-word" aria-hidden="true">comprar </span>
-<span class="reveal-word" aria-hidden="true">uma </span>
+<span class="reveal-word" aria-hidden="true">a </span>
 <span class="reveal-word" aria-hidden="true">casa </span>
 <span class="reveal-word" aria-hidden="true">pronta.</span>
 </span>
 </h2>
 <p>A BBG oferece diversas casas prontas para venda na Flórida.</p>
 <div class="ready-links">
-<span class="ready-model-name">Modelo Agate</span>
-<span class="ready-model-name">Modelo Emerald</span>
-<span class="ready-model-name">Modelo Duplex</span>
-<span class="ready-model-name">Modelo Onyx</span>
+<a class="ready-model-name" href="#contato">Modelo Agate <span class="arrow-glyph" aria-hidden="true">↗︎</span></a>
+<a class="ready-model-name" href="#contato">Modelo Emerald <span class="arrow-glyph" aria-hidden="true">↗︎</span></a>
+<a class="ready-model-name" href="#contato">Modelo Duplex <span class="arrow-glyph" aria-hidden="true">↗︎</span></a>
+<a class="ready-model-name" href="#contato">Modelo Onyx <span class="arrow-glyph" aria-hidden="true">↗︎</span></a>
 </div>
-<span class="prime-text-link bbg-static-link">Veja mais casas à venda</span>
 </div>
 </div>
 </section>
